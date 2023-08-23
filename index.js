@@ -2,24 +2,28 @@
 
 const express = require('express');
 const app = express();
-const port = 3000; 
-const weatherData = require('./weather.json');
+const port = 3001; 
+const weatherData = require('./data/weather.json');
 
 
 app.get('/weather', (req, res) => {
   const { lat, lon, searchQuery } = req.query;
 
-  
+  console.log(lat, lon, searchQuery);
   const city = weatherData.find(city => {
+    console.log(city);
     return (
       city.lat === parseFloat(lat) &&
-      city.lon === parseFloat(lon) &&
-      (city.city === searchQuery || city.name === searchQuery)
+      city.lon === parseFloat(lon) ||
+      (city.city_name.toLowerCase() === searchQuery.toLowerCase()  )
     );
   });
 
+// Lines 13-19 built with ChatGPT //
+//if there isn't a city, slap the 404 on em
+
   if (!city) {
-    return res.status(404).json({ error: 'City not found' });
+    return res.status(404).json({ error: 'City not found.' });
   }
 
   
@@ -31,7 +35,8 @@ app.get('/weather', (req, res) => {
   }
 
   const forecastArray = city.data.map(dataPoint => {
-    return new Forecast(dataPoint.date, dataPoint.description);
+    console.log('THIS IS A DATAPOINT: ', dataPoint);
+    return new Forecast(dataPoint.datetime, dataPoint.weather.description);
   });
 
   res.json(forecastArray);
