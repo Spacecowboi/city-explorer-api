@@ -2,44 +2,42 @@
 
 const express = require('express');
 const app = express();
+const axios = require('axios');
 const port = 3001; 
-const weatherData = require('./data/weather.json');
+require('dotenv').config();
+const W_API_KEY=process.env.WEATHER_API_KEY;
 
-
-app.get('/weather', (req, res) => {
-  const { lat, lon, searchQuery } = req.query;
-
-  console.log(lat, lon, searchQuery);
-  const city = weatherData.find(city => {
-    console.log(city);
-    return (
-      city.lat === parseFloat(lat) &&
-      city.lon === parseFloat(lon) ||
-      (city.city_name.toLowerCase() === searchQuery.toLowerCase()  )
-    );
-  });
-
-// Lines 13-19 built with ChatGPT //
-//if there isn't a city, slap the 404 on em
-
-  if (!city) {
-    return res.status(404).json({ error: 'City not found.' });
+class Forecast {
+  constructor(date, description) {
+    this.date = date;
+    this.description = description;
   }
+}
 
+app.get('/weather', async (req, res) => {
+  const { lat, lon } = req.query;
+
+  try {
+    const response = await axios.get(`https://api.weatherbit.io/v2.0/current?key=${W_API_KEY}&lat=${lat}&lon=${lon}`);
   
-  class Forecast {
-    constructor(date, description) {
-      this.date = date;
-      this.description = description;
+    const data = response.data.data;
+
+    const forecastItems = [];
+
+    for (let i = 0; i < data.length; i++) {
+      const date = data[i].datetime;
+      const description = data[i].weather.description;
+      const forecast = new Forecast(date, description);
+      forecastItems.push(forecast);
+
+      console.log(`Date: ${date}, Description: ${description}`);
     }
-  }
 
-  const forecastArray = city.data.map(dataPoint => {
-    console.log('THIS IS A DATAPOINT: ', dataPoint);
-    return new Forecast(dataPoint.datetime, dataPoint.weather.description);
-  });
-
-  res.json(forecastArray);
+  res.json(response.data);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: 'Internal server error. Dont worry its not you.'});
+}
 });
 
 app.listen(port, () => {
