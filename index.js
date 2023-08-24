@@ -15,6 +15,8 @@ class Forecast {
   }
 }
 
+app.use(cors());
+
 app.get('/weather', async (req, res) => {
   const { lat, lon } = req.query;
 
@@ -34,7 +36,7 @@ app.get('/weather', async (req, res) => {
       console.log(`Date: ${date}, Description: ${description}`);
     }
 
-  res.json(response.data);
+  res.json(forecastItems);
 } catch (error) {
   console.error(error);
   res.status(500).json({ error: 'Internal server error. Dont worry its not you.'});
