@@ -1,10 +1,11 @@
 'use strict';
 
 const axios = require('axios');
+const MOVIE_API_KEY=process.env.MOVIE_API_KEY;
 
 async function getMovies(req, res) {
   const { city } = req.query;
-
+    console.log("HERE IS OUR CITY: " + city);
   try {
     const response = await axios.get(`https://api.themoviedb.org/3/search/movie?api_key=${MOVIE_API_KEY}&query=${city}`);
     const movies = response.data.results;
@@ -29,4 +30,4 @@ async function getMovies(req, res) {
   }
 }
 
-module.exports = {getMovies};
+module.exports = getMovies;

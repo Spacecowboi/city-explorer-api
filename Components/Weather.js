@@ -2,6 +2,7 @@
 
 
 const axios = require('axios');
+const W_API_KEY=process.env.WEATHER_API_KEY;
 
 class Forecast {
   constructor(date, description) {
@@ -36,4 +37,4 @@ async function getWeather(req, res) {
   }
 }
 
-module.exports = {getWeather};
+module.exports = getWeather;
